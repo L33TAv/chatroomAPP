@@ -3,14 +3,11 @@ import ssl
 import threading
 import getpass
 from database import *
-
-host = '127.0.0.1' 
-port = 55555
-MAX_ATTEMPTS = 3
+from config import HOST,PORT,MAX_ATTEMPTS,CERT_FILE,KEY_FILE,DB_NAME,BUFFER_SIZE,TIMEZONE,BANS_FILE
 
 # creating regular socket 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((host,port))
+server.bind((HOST,PORT))
 server.listen()
 
 clients = []
@@ -25,7 +22,7 @@ context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)  # פרוטוקול TLS
 for attempt in range(MAX_ATTEMPTS):
     try:
         password = getpass.getpass("Enter password for private key: ")
-        context.load_cert_chain(certfile="cert.pem", keyfile="key.pem", password=password)  # with the password i generated with
+        context.load_cert_chain(certfile=CERT_FILE, keyfile=KEY_FILE, password=password)  # with the password i generated with
         print("Certificate and key loaded successfully.")
         break  # יוצאים מהלולאה אם הצליח
     except ssl.SSLError as e:
@@ -37,7 +34,7 @@ else:
 
 
 def broadcast(message,sender,nickname):
-    israel_tz = pytz.timezone("Asia/Jerusalem")
+    israel_tz = pytz.timezone(TIMEZONE)
     timestamp = datetime.now(israel_tz).strftime("%d.%m.%Y %H:%M")
     save_message(nickname, message.decode('utf-8'))
 
@@ -57,7 +54,7 @@ def broadcast(message,sender,nickname):
 def handle(client):
     while True:
         try:            
-            message = client.recv(1024)
+            message = client.recv(BUFFER_SIZE)
             msg = message
             name = nicknames[clients.index(client)]
 
@@ -74,7 +71,7 @@ def handle(client):
                     name_to_ban = msg.decode('utf-8')[4:]
                     kick_user(name_to_ban, client)
                     if client in clients:
-                        with open('bans.txt', 'a') as f:
+                        with open(BANS_FILE, 'a') as f:
                             f.write(f'{name_to_ban}\n')
                     print(f'{name_to_ban} was banned!')
                 else:
@@ -109,12 +106,12 @@ def receive():
 
         # gets username
         client.send('USERNAME'.encode('utf-8'))
-        username = client.recv(1024).decode('utf-8')
+        username = client.recv(BUFFER_SIZE).decode('utf-8')
 
         # client.send('NICK'.encode('utf-8'))
-        # nickname = client.recv(1024).decode('utf-8')
+        # nickname = client.recv(BUFFER_SIZE).decode('utf-8')
 
-        with open('bans.txt','r') as f:
+        with open(BANS_FILE,'r') as f:
             bans = f.readlines() 
         if username+'\n' in bans:
             print(f"banned user {username} tried to log in")
@@ -124,7 +121,7 @@ def receive():
 
         #checks for pass
         client.send('PASSWORD'.encode('utf-8'))
-        password = client.recv(1024).decode('utf-8')
+        password = client.recv(BUFFER_SIZE).decode('utf-8')
 
         #auth of the user
         auth = authenticate_user(username, password)
@@ -145,7 +142,7 @@ def receive():
 
         # if username == 'admin':
         #     client.send('PASS'.encode('utf-8'))
-        #     password = client.recv(1024).decode('utf-8')
+        #     password = client.recv(BUFFER_SIZE).decode('utf-8')
 
         #     if password != 'adminpass':
         #         client.send('REFUSE'.encode('utf-8'))

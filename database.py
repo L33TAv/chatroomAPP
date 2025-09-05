@@ -3,8 +3,7 @@ import sqlite3
 import bcrypt
 import pytz
 from datetime import datetime
-
-DB_NAME = 'chat.db'
+from config import DB_NAME
 
 def create_messages_table():
     conn = sqlite3.connect(DB_NAME) 

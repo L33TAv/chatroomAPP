@@ -1,6 +1,7 @@
 import socket
 import threading 
 import ssl
+from config import CERT_FILE,HOST_NAME,PORT,HOST,BUFFER_SIZE
 
 nickname = input("choose a nickname:")
 '''if nickname == 'admin':
@@ -9,11 +10,11 @@ nickname = input("choose a nickname:")
 context = ssl.create_default_context()
 context.check_hostname = False
 context.verify_mode = ssl.CERT_REQUIRED
-context.load_verify_locations("cert.pem")  # Path to the pinned certificate
+context.load_verify_locations(CERT_FILE)  # Path to the pinned certificate
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-ssl_client = context.wrap_socket(sock, server_hostname="localhost")
-ssl_client.connect(('127.0.0.1', 55555))
+ssl_client = context.wrap_socket(sock, server_hostname=HOST_NAME)
+ssl_client.connect((HOST, PORT))
 
 client = ssl_client  # נשתמש בזה בהמשך כרגיל
 
@@ -28,7 +29,7 @@ def receive():
         if stop_thread:
             break
         try:
-            message = client.recv(1024).decode('utf-8')
+            message = client.recv(BUFFER_SIZE).decode('utf-8')
 
             if not message:
                 print("Connection has stopped.")
@@ -85,14 +86,10 @@ def write():
         except Exception as e:
             print(f"There was an error with sending the message, {e}")
             break
-        
 
-def main():
+if __name__ == "__main__":
     receive_thread = threading.Thread(target=receive)
     receive_thread.start()
 
     write_thread = threading.Thread(target=write)
     write_thread.start()
-
-if __main__ == "__main__":
-    main()
