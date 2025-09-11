@@ -3,9 +3,10 @@ import threading
 import ssl
 from config import CERT_FILE,HOST_NAME,PORT,HOST,BUFFER_SIZE
 
+stop_thread = False
+authenticated = False
+
 nickname = input("choose a nickname:")
-'''if nickname == 'admin':
-    password = input('Enter the password for admin:')'''
 
 context = ssl.create_default_context()
 context.check_hostname = False
@@ -16,15 +17,13 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ssl_client = context.wrap_socket(sock, server_hostname=HOST_NAME)
 ssl_client.connect((HOST, PORT))
 
-client = ssl_client  # נשתמש בזה בהמשך כרגיל
-
-stop_thread = False
-authenticated = False
+client = ssl_client 
 
 
 def receive():
     global stop_thread
     global authenticated 
+    
     while True:
         if stop_thread:
             break
@@ -68,6 +67,7 @@ def receive():
             client.close()
             break
 
+
 def write():
     while True:
         if stop_thread:
@@ -87,9 +87,14 @@ def write():
             print(f"There was an error with sending the message, {e}")
             break
 
-if __name__ == "__main__":
+
+def main():
     receive_thread = threading.Thread(target=receive)
     receive_thread.start()
 
     write_thread = threading.Thread(target=write)
     write_thread.start()
+
+
+if __name__ == "__main__":
+    main()

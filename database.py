@@ -55,7 +55,7 @@ def authenticate_user(username, password):
     conn.close()
 
     if row is None:
-        return None  # המשתמש לא קיים
+        return None  #user doesn't exist
 
     stored_hash = row[0]
     if bcrypt.checkpw(password.encode(), stored_hash):
