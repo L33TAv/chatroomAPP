@@ -15,6 +15,9 @@ class ServerChat():
     def __init__(self):
         self.clients = {}  # client:nickname
     
+        #Time zone
+        self.tz = pytz.timezone(TIMEZONE)
+
         # DB connection
         database.create_users_table()
         database.create_messages_table()
@@ -41,10 +44,9 @@ class ServerChat():
         logging.critical("Too many failed attempts. Exiting.")
         exit(1)
 
-    def broadcast(self, message: bytes, sender=None, nickname="Uknown"):
+    def broadcast(self, message: bytes, sender=None, nickname="Unknown"):
         #sends to other users
-        israel_tz = pytz.timezone(TIMEZONE)
-        timestamp = datetime.now(israel_tz).strftime("%d.%m.%Y %H:%M")
+        timestamp = datetime.now(self.tz).strftime("%d.%m.%Y %H:%M")
         
         message = message.decode('utf-8')
         database.save_message(nickname, message) #loads texts only into database
@@ -135,7 +137,7 @@ class ServerChat():
             try:
                 client = self.context.wrap_socket(client_socket, server_side=True)
             except ssl.SSLError as e:
-                logging.ERROR(f"SSL error: {e}")
+                logging.error(f"SSL error: {e}")
                 client_socket.close()
                 continue
 
@@ -158,7 +160,6 @@ class ServerChat():
             except:
                 pass
         self.clients.clear()
-        self.nicknames.clear()
         self.server.close()
             
 
