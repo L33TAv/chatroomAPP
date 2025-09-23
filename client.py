@@ -1,8 +1,3 @@
-"""
-test everything - create test file. somehow figure out a way to test the server and the client connections.
-problem - if user sends BAN/USERNAME...
-to update requuirements file.
-"""
 import socket
 import threading 
 import ssl
@@ -56,7 +51,11 @@ def auth(client,login_type,username, password):
             return False
         
         elif response == "EXISTS":
-            messagebox.showwarning("Invalid Input","Username already exists!")
+            messagebox.showwarning("Invalid Input",f"Username '{username}' already exists!")
+            return False
+        
+        elif response == "NOT_EXISTS":
+            messagebox.showwarning("Invalid Input",f"No Username called '{username}'")
             return False
 
         elif response == 'AUTH_SUCCESS':

@@ -111,6 +111,11 @@ class ServerChat():
                 client.send('EXISTS'.encode('utf-8'))
                 client.close()
                 return None, None
+            
+            elif not database.check_user(username) and login_type=="login":
+                client.send('NOT_EXISTS'.encode('utf-8'))
+                client.close()
+                return None, None
 
             auth = database.authenticate_user(username, password)
             if auth is True:
