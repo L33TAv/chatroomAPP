@@ -18,3 +18,6 @@
 cd chatroomAPP
 pip install -r requirements.txt
 ```
+
+## Acknowledgements
+ [Tkinter-Designer used with Figma](https://github.com/ParthJadhav/Tkinter-Designer)
