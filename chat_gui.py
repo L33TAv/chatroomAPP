@@ -1,5 +1,6 @@
 from pathlib import Path
 from tkinter import Toplevel, Tk, Canvas, Entry, Text, Button, PhotoImage, END, CENTER, messagebox
+import client
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\ליאב\Desktop\Root\software\chatroomAPP\GUI\assets\frame1")
@@ -7,11 +8,13 @@ ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\ליאב\Desktop\Root\software\chatr
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
 
-def auth(type, username, password):
+def auth(login_type, username, password):
+    '''login_type = register/login'''
     if username == "" or password == "":
         messagebox.showwarning("Invalid Input", "Must type username and password!")
         return False
-    return True
+    else:
+        return client.connect(login_type,username,password)
 
 def open_chat_gui(type, username, password, window):
     if not auth(type, username, password):

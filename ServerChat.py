@@ -97,17 +97,20 @@ class ServerChat():
 
     def authenticate_client(self, client):
         try:
-            client.send('USERNAME'.encode('utf-8'))
+            login_type =  client.recv(BUFFER_SIZE).decode('utf-8')
             username = client.recv(BUFFER_SIZE).decode('utf-8')
+            password = client.recv(BUFFER_SIZE).decode('utf-8')
 
             with open(BANS_FILE, 'r') as f:
                 if username + '\n' in f.readlines():
                     client.send('BAN'.encode('utf-8'))
                     client.close()
                     return None, None
-
-            client.send('PASSWORD'.encode('utf-8'))
-            password = client.recv(BUFFER_SIZE).decode('utf-8')
+                
+            if database.check_user(username) and login_type=="register":
+                client.send('EXISTS'.encode('utf-8'))
+                client.close()
+                return None, None
 
             auth = database.authenticate_user(username, password)
             if auth is True:

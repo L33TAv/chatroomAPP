@@ -1,26 +1,87 @@
+"""
+test everything - create test file. somehow figure out a way to test the server and the client connections.
+problem - if user sends BAN/USERNAME...
+to update requuirements file.
+"""
 import socket
 import threading 
 import ssl
 from config import CERT_FILE,HOST_NAME,PORT,HOST,BUFFER_SIZE
+from tkinter import messagebox
 
 stop_thread = False
 authenticated = False
 
-nickname = input("choose a nickname:")
 
-context = ssl.create_default_context()
-context.check_hostname = False
-context.verify_mode = ssl.CERT_REQUIRED
-context.load_verify_locations(CERT_FILE)  # Path to the pinned certificate
+def connect(login_type,username,password):
+    try:
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_REQUIRED
+        context.load_verify_locations(CERT_FILE)  # Path to the pinned certificate
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-ssl_client = context.wrap_socket(sock, server_hostname=HOST_NAME)
-ssl_client.connect((HOST, PORT))
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        ssl_client = context.wrap_socket(sock, server_hostname=HOST_NAME)
+        ssl_client.connect((HOST, PORT))
+        client = ssl_client 
+    except:
+        messagebox.showwarning("Something went wrong, please try again.")
+        return False
+        
+    if not auth(client,login_type,username,password):
+        return False
+    
+    connect_thread = threading.Thread(target=receive,args=(client, username))
+    connect_thread.start()
 
-client = ssl_client 
+    write_thread = threading.Thread(target=write,args=(client, username))
+    write_thread.start()
 
 
-def receive():
+def auth(client,login_type,username, password):
+    global authenticated
+
+    try:
+        client.send(login_type.encode('utf-8'))
+        client.send(username.encode('utf-8'))
+        client.send(password.encode('utf-8'))
+
+        response = client.recv(BUFFER_SIZE).decode('utf-8')
+
+        if not response:
+            messagebox.showwarning("Something went wrong, please try again.")
+            return False
+        
+        if response  == 'BAN':
+            messagebox.showwarning("You are banned!")
+            return False
+        
+        elif response == "EXISTS":
+            messagebox.showwarning("Username already exists!")
+            return False
+
+        elif response == 'AUTH_SUCCESS':
+            messagebox.showwarning("Welcome back!")
+            authenticated = True
+            return True
+
+
+        elif response == 'REGISTERED':
+            messagebox.showwarning(f"Welcome to the chat {username}!")
+            authenticated = True
+            return True
+
+        elif response == 'REFUSE':
+            messagebox.showwarning("Username or password are incorrect. Exiting server...")
+            return False
+
+    except:
+        messagebox.showwarning("Something went wrong, please try again.")
+        return False
+
+
+def receive(client,nickname):
+    '''Config this func after auth'''
     global stop_thread
     global authenticated 
     
@@ -35,31 +96,6 @@ def receive():
                 stop_thread = True
                 break
 
-            if message == 'USERNAME':
-                client.send(nickname.encode('utf-8'))
-
-            elif message == 'PASSWORD':
-                password = input("Enter your password: ")
-                client.send(password.encode('utf-8'))
-
-            elif message == 'AUTH_SUCCESS':
-                print("Welcome back!")
-                authenticated = True
-
-
-            elif message == 'REGISTERED':
-                print(f"Welcome to the chat {nickname}!")
-                authenticated = True
-
-            elif message == 'REFUSE':
-                print("Username or password are incorrect. Exiting server...")
-                stop_thread = True
-
-            elif message == 'BAN':
-                print("You are banned!")
-                client.close()
-                stop_thread = True
-
             else:
                 print(f"{message}\n>",end="")
 
@@ -69,7 +105,7 @@ def receive():
             break
 
 
-def write():
+def write(client,nickname):
     while True:
         if stop_thread:
             break
@@ -88,14 +124,3 @@ def write():
             print(f"There was an error with sending the message, {e}")
             break
 
-
-def main():
-    receive_thread = threading.Thread(target=receive)
-    receive_thread.start()
-
-    write_thread = threading.Thread(target=write)
-    write_thread.start()
-
-
-if __name__ == "__main__":
-    main()
