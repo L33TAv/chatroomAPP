@@ -47,14 +47,14 @@ def register_user(username, password):
     finally:
         conn.close()
 
-def check_user(username, password):
+def check_user(username):
     """Checks if the users exists, it will return True."""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT EXISTS(SELECT 1 FROM users WHERE username=?)", (username,))
     exists = cursor.fetchone()[0]
     conn.close()
-    return exists
+    return bool(exists)
 
 def authenticate_user(username, password):
     conn = sqlite3.connect(DB_NAME)
