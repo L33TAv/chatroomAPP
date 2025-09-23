@@ -19,7 +19,7 @@ def auth(login_type, username, password):
 def open_chat_gui(type, username, password, window):
     if not auth(type, username, password):
         return
-    
+        
     window.withdraw()
 
     chat_window = Toplevel(window)

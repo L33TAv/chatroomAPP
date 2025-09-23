@@ -128,7 +128,7 @@ button_1 = Button(
     image=button_image_1,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: chat_gui.open_chat_gui("login",entry_1.get(), entry_2.get(), window),
+    command=lambda: chat_gui.open_chat_gui("register",entry_1.get(), entry_2.get(), window),
     relief="flat"
 )
 button_1.place(
@@ -160,7 +160,7 @@ button_2 = Button(
     image=button_image_2,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: chat_gui.open_chat_gui("register",entry_1.get(), entry_2.get(), window),
+    command=lambda: chat_gui.open_chat_gui("login",entry_1.get(), entry_2.get(), window),
     relief="flat"
 )
 button_2.place(

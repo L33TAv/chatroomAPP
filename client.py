@@ -24,8 +24,9 @@ def connect(login_type,username,password):
         ssl_client = context.wrap_socket(sock, server_hostname=HOST_NAME)
         ssl_client.connect((HOST, PORT))
         client = ssl_client 
-    except:
-        messagebox.showwarning("Something went wrong, please try again.")
+    except Exception as e:
+        print(e)
+        messagebox.showwarning("Invalid Input","Something went wrong, please try again.")
         return False
         
     if not auth(client,login_type,username,password):
@@ -37,6 +38,8 @@ def connect(login_type,username,password):
     write_thread = threading.Thread(target=write,args=(client, username))
     write_thread.start()
 
+    return True
+
 
 def auth(client,login_type,username, password):
     global authenticated
@@ -47,36 +50,34 @@ def auth(client,login_type,username, password):
         client.send(password.encode('utf-8'))
 
         response = client.recv(BUFFER_SIZE).decode('utf-8')
-
-        if not response:
-            messagebox.showwarning("Something went wrong, please try again.")
-            return False
         
         if response  == 'BAN':
-            messagebox.showwarning("You are banned!")
+            messagebox.showerror("Invalid Input","You are banned!")
             return False
         
         elif response == "EXISTS":
-            messagebox.showwarning("Username already exists!")
+            messagebox.showwarning("Invalid Input","Username already exists!")
             return False
 
         elif response == 'AUTH_SUCCESS':
-            messagebox.showwarning("Welcome back!")
             authenticated = True
             return True
 
-
         elif response == 'REGISTERED':
-            messagebox.showwarning(f"Welcome to the chat {username}!")
+            messagebox.showwarning("Invalid Input",f"Welcome to the chat {username}!")
             authenticated = True
             return True
 
         elif response == 'REFUSE':
-            messagebox.showwarning("Username or password are incorrect. Exiting server...")
+            messagebox.showwarning("Invalid Input","Username or password are incorrect.")
+            return False
+        
+        else:
+            messagebox.showerror("Failed","Something went wrong with the login, please try again.")
             return False
 
     except:
-        messagebox.showwarning("Something went wrong, please try again.")
+        messagebox.showerror("Error","Something went wrong, please try again.")
         return False
 
 
