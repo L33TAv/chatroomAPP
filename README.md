@@ -11,7 +11,7 @@
 ## Installation guide
 - **Clone the repository** - 
 ```
- git clone https://github.com/L33TAv/chatroomAPP
+ git clone https://github.com/L33TAv/chatroomAPP.git
 ```
 - **Install requirements** - 
 ```

@@ -46,6 +46,7 @@ def receive():
                 print("Welcome back!")
                 authenticated = True
 
+
             elif message == 'REGISTERED':
                 print(f"Welcome to the chat {nickname}!")
                 authenticated = True

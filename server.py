@@ -3,6 +3,7 @@ import logging
 
 
 def main():
+    
     server = ServerChat()
     try:
         server.receive()
