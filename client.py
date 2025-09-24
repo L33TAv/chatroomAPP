@@ -27,12 +27,16 @@ def connect(login_type,username,password):
         ssl_client.connect((HOST, PORT))
         ssl_client.settimeout(1.0)  
         client = ssl_client 
+    except (ConnectionRefusedError,TimeoutError):
+        messagebox.showerror("Server Error","Server is unavailable.")
+        return False
     except Exception as e:
         print(e)
         messagebox.showwarning("Invalid Input","Something went wrong, please try again.")
         return False
         
     if not auth(client,login_type,username,password):
+        client.close()
         return False
     
     receive_thread = threading.Thread(target=receive,args=(client,))
@@ -48,6 +52,8 @@ def close_chat():
 
     stop_thread = True
     
+    if receive_thread and receive_thread.is_alive():
+        receive_thread.join(timeout=1.0)
 
     if client:
         try:
@@ -55,9 +61,8 @@ def close_chat():
             client.close()
         except:
             pass
-
-    if receive_thread and receive_thread.is_alive():
-        receive_thread.join()
+        finally:
+            client = None
 
 
 
@@ -110,50 +115,46 @@ def receive(client):
     global stop_thread
     global authenticated 
     
-    try:
-        while True:
-            if stop_thread:
-                break
-            try:
-                message = client.recv(BUFFER_SIZE).decode('utf-8')
-
-                if not message: # Modify to exit the app.
-                    print("Connection has stopped.") 
-                    stop_thread = True
-                    break
-
-                else:
-                    chat_gui.message_queue.put((message,False))
-
-            except socket.timeout:
-                continue 
-            except Exception as e:
-                stop_thread = True
-                print(f"An error occurred! - {e}")
-                break
-    finally:
+    while not stop_thread and client:
         try:
-            chat_gui.close_chat()
-            client.close()
-        except:
-            pass
+            message = client.recv(BUFFER_SIZE).decode('utf-8')
+
+            if not message: 
+                print("Connection has stopped.") 
+                stop_thread = True
+                break
+
+            else:
+                chat_gui.message_queue.put((message,False))
+
+        except socket.timeout:
+            continue 
+        except Exception as e:
+            stop_thread = True
+            print(f"An error occurred! - {e}")
+            break
             
 
 
 def write(nickname, message):
-    while True:
-        if stop_thread:
-            break
-        if not authenticated:
-            continue
-        try:
-            new_message = f"{nickname}: {message}"
-            client.send(f"{nickname}: {message}".encode('utf-8'))
-            chat_gui.message_queue.put((new_message, True))
-        except BrokenPipeError:
-            print("the connection was already closed by the server.")
-            break
-        except Exception as e:
-            print(f"There was an error with sending the message, {e}")
-            break
+    global stop_thread,authenticated
+    
+    if stop_thread or not authenticated or client is None:
+        return
+    try:
+        new_message = f"{nickname}: {message}"
+        client.send(f"{nickname}: {message}".encode('utf-8'))
+        chat_gui.message_queue.put((new_message, True))
+
+    except BrokenPipeError:
+        messagebox.showerror("Server Error","the connection was already closed by the server.")
+        chat_gui.close_chat()
+    except Exception as e:
+        messagebox.showerror("Error",f"There was an error with sending the message, {e}")
+        chat_gui.close_chat()
+
+        
+        
+            
+            
 

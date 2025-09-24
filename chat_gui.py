@@ -9,7 +9,7 @@ ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\ליאב\Desktop\Root\software\chatr
 message_queue = queue.Queue()
 
 
-def process_queue(text_area):
+def process_queue(text_area,chat_window,window):
     while not message_queue.empty():
         msg,is_user = message_queue.get_nowait()
         if is_user:
@@ -22,7 +22,10 @@ def process_queue(text_area):
         text_area.insert(END, f"{msg}\n", "center")
         text_area.see(END)
         text_area.config(state="disabled")
-    text_area.after(100, lambda: process_queue(text_area)) 
+    if client.stop_thread:
+        close_chat(chat_window,window)
+    else:
+        text_area.after(100, lambda: process_queue(text_area,chat_window,window)) 
 
 
 def relative_to_assets(path: str) -> Path:
@@ -77,7 +80,7 @@ def open_chat_gui(type, username, password, window):
     text_area.place(x=30, y=70, width=1220, height=480)
     text_area.config(state="disabled")
 
-    text_area.after(100, lambda: process_queue(text_area))
+    text_area.after(100, lambda: process_queue(text_area,chat_window,window))
 
 
     entry_width, entry_height, entry_x, entry_y = 1050, 71, 30, 600
