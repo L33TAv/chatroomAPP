@@ -1,9 +1,29 @@
 from pathlib import Path
 from tkinter import Toplevel, Tk, Canvas, Entry, Text, Button, PhotoImage, END, CENTER, messagebox
 import client
+import queue
+
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\ליאב\Desktop\Root\software\chatroomAPP\GUI\assets\frame1")
+message_queue = queue.Queue()
+
+
+def process_queue(text_area):
+    while not message_queue.empty():
+        msg,is_user = message_queue.get_nowait()
+        if is_user:
+            tag_name = "my_message"
+            text_area.tag_configure(tag_name, foreground="blue")
+        else:
+            tag_name = "other_message"
+            text_area.tag_configure(tag_name, foreground="black")
+        text_area.config(state="normal")
+        text_area.insert(END, f"{msg}\n", "center")
+        text_area.see(END)
+        text_area.config(state="disabled")
+    text_area.after(100, lambda: process_queue(text_area)) 
+
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
@@ -57,6 +77,9 @@ def open_chat_gui(type, username, password, window):
     text_area.place(x=30, y=70, width=1220, height=480)
     text_area.config(state="disabled")
 
+    text_area.after(100, lambda: process_queue(text_area))
+
+
     entry_width, entry_height, entry_x, entry_y = 1050, 71, 30, 600
     entry_msg = Entry(
         chat_window,
@@ -94,12 +117,10 @@ def open_chat_gui(type, username, password, window):
 def send_message(text_area, entry_msg, username):
     msg = entry_msg.get()
     if msg.strip():
-        text_area.config(state="normal")
-        text_area.insert(END, f"{username}: {msg}\n", "center")
-        text_area.see(END)
-        text_area.config(state="disabled")
+        client.write(username,msg)
         entry_msg.delete(0, END)
 
 def close_chat(chat_window, window):
+    client.close_chat()
     chat_window.destroy()
     window.deiconify()

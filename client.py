@@ -3,13 +3,20 @@ import threading
 import ssl
 from config import CERT_FILE,HOST_NAME,PORT,HOST,BUFFER_SIZE
 from tkinter import messagebox
+import chat_gui
 
 stop_thread = False
 authenticated = False
-
+client = None
 
 def connect(login_type,username,password):
     try:
+        global stop_thread
+        global client
+        global receive_thread
+
+        stop_thread = False
+
         context = ssl.create_default_context()
         context.check_hostname = False
         context.verify_mode = ssl.CERT_REQUIRED
@@ -18,6 +25,7 @@ def connect(login_type,username,password):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         ssl_client = context.wrap_socket(sock, server_hostname=HOST_NAME)
         ssl_client.connect((HOST, PORT))
+        ssl_client.settimeout(1.0)  
         client = ssl_client 
     except Exception as e:
         print(e)
@@ -27,13 +35,31 @@ def connect(login_type,username,password):
     if not auth(client,login_type,username,password):
         return False
     
-    connect_thread = threading.Thread(target=receive,args=(client, username))
-    connect_thread.start()
-
-    write_thread = threading.Thread(target=write,args=(client, username))
-    write_thread.start()
+    receive_thread = threading.Thread(target=receive,args=(client,))
+    receive_thread.start()
 
     return True
+
+
+def close_chat():
+    global stop_thread
+    global client
+    global receive_thread
+
+    stop_thread = True
+    
+
+    if client:
+        try:
+            client.shutdown(socket.SHUT_RDWR)
+            client.close()
+        except:
+            pass
+
+    if receive_thread and receive_thread.is_alive():
+        receive_thread.join()
+
+
 
 
 def auth(client,login_type,username, password):
@@ -80,43 +106,50 @@ def auth(client,login_type,username, password):
         return False
 
 
-def receive(client,nickname):
-    '''Config this func after auth'''
+def receive(client):
     global stop_thread
     global authenticated 
     
-    while True:
-        if stop_thread:
-            break
-        try:
-            message = client.recv(BUFFER_SIZE).decode('utf-8')
-
-            if not message:
-                print("Connection has stopped.")
-                stop_thread = True
+    try:
+        while True:
+            if stop_thread:
                 break
+            try:
+                message = client.recv(BUFFER_SIZE).decode('utf-8')
 
-            else:
-                print(f"{message}\n>",end="")
+                if not message: # Modify to exit the app.
+                    print("Connection has stopped.") 
+                    stop_thread = True
+                    break
 
-        except Exception as e:
-            print(f"An error occurred! - {e}")
+                else:
+                    chat_gui.message_queue.put((message,False))
+
+            except socket.timeout:
+                continue 
+            except Exception as e:
+                stop_thread = True
+                print(f"An error occurred! - {e}")
+                break
+    finally:
+        try:
+            chat_gui.close_chat()
             client.close()
-            break
+        except:
+            pass
+            
 
 
-def write(client,nickname):
+def write(nickname, message):
     while True:
         if stop_thread:
             break
         if not authenticated:
             continue
         try:
-            message = input("> ")
-            if message.startswith("/kick ") or message.startswith("/ban "):
-                client.send(message.replace("/", "").upper().encode('utf-8'))
-            else:
-                client.send(f"{nickname}: {message}".encode('utf-8'))
+            new_message = f"{nickname}: {message}"
+            client.send(f"{nickname}: {message}".encode('utf-8'))
+            chat_gui.message_queue.put((new_message, True))
         except BrokenPipeError:
             print("the connection was already closed by the server.")
             break

@@ -139,25 +139,29 @@ class ServerChat():
         logging.info("Server is listening...")
 
         while True:
-            client_socket, addr = self.server.accept()
-            logging.info(f"Connected with: {addr}")
-
             try:
-                client = self.context.wrap_socket(client_socket, server_side=True)
-            except ssl.SSLError as e:
-                logging.error(f"SSL error: {e}")
-                client_socket.close()
-                continue
+                client_socket, addr = self.server.accept()
+                logging.info(f"Connected with: {addr}")
 
-            client, username = self.authenticate_client(client)
-            if not client:
-                continue
+                try:
+                    client = self.context.wrap_socket(client_socket, server_side=True)
+                except ssl.SSLError as e:
+                    logging.error(f"SSL error: {e}")
+                    client_socket.close()
+                    continue
 
-            self.clients[client] = username
+                client, username = self.authenticate_client(client)
+                if not client:
+                    continue
 
-            self.broadcast(f'{username} has just entered the chat!'.encode('utf-8'), client, username)
+                self.clients[client] = username
 
-            threading.Thread(target=self.handle_client, args=(client,), daemon=True).start()
+                self.broadcast(f'{username} has just entered the chat!'.encode('utf-8'), client, username)
+
+                threading.Thread(target=self.handle_client, args=(client,), daemon=True).start()
+            except Exception as e:
+                 logging.warning(f"Connected failed with: {addr} - {e}")
+
 
     def shutdown(self):
         logging.info("Shutting down server...")
