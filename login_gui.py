@@ -5,8 +5,6 @@ from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage,Label
 from tkinter import messagebox
 import chat_gui
 
-OK_CHARS = ["",".","_"]
-
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\ליאב\Desktop\Root\software\chatroomAPP\GUI\assets\frame0")
 
