@@ -22,6 +22,7 @@ def process_queue(text_area,chat_window,window):
         text_area.see(END)
         text_area.config(state="disabled")
     if client.stop_thread:
+        messagebox.showerror("Server error","Connection with the server has stopped.")
         close_chat(chat_window,window)
     else:
         text_area.after(100, lambda: process_queue(text_area,chat_window,window)) 

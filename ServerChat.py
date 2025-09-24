@@ -7,7 +7,7 @@ import getpass
 from datetime import datetime
 
 import database 
-from config import HOST,PORT,MAX_ATTEMPTS,CERT_FILE,KEY_FILE,BUFFER_SIZE,TIMEZONE,BANS_FILE, TIME_FORMAT
+from config import HOST,PORT,MAX_ATTEMPTS,CERT_FILE,KEY_FILE,BUFFER_SIZE,TIMEZONE,BANS_FILE, TIME_FORMAT, LAST_MESSAGES_SENT
 
 logging.basicConfig(level=logging.INFO,format="%(asctime)s [%(levelname)s] %(message)s")
 
@@ -46,7 +46,6 @@ class ServerChat():
 
     def broadcast(self, message: bytes, sender=None, nickname="Unknown"):
         #sends to other users
-        print("sending -", nickname)
         timestamp = datetime.now(self.tz).strftime(TIME_FORMAT)
         
         message = message.decode('utf-8')
@@ -67,7 +66,7 @@ class ServerChat():
 
         if nickname:
             client.close()
-            self.broadcast(f"{nickname} left the chat.".encode('utf-8'),client,nickname)
+            self.broadcast(f"{nickname} left the chat.".encode('utf-8'),client," SERVER_MESSAGE ")
             logging.info(f"{nickname} disconnected.")
 
     def is_message_ok(self,message: bytes): 
@@ -92,6 +91,18 @@ class ServerChat():
                 logging.error(f"Server Error: {e}")
                 break
         self.remove_client(client)
+
+
+    def send_last_messages(self,client,username):
+        messages = database.get_last_messages(LAST_MESSAGES_SENT)
+        for message in messages:
+            try:
+                if message[0] != " SERVER_MESSAGE ":
+                    client.send(f"{message[-1]} {message[-2]}".encode('utf-8'))
+            except Exception as e:
+                logging.error(f"Error sending message:{message} for: {client}, {e},")
+                break
+
 
     def authenticate_client(self, client):
         try:
@@ -125,6 +136,9 @@ class ServerChat():
                 client.close()
                 return None, None
 
+            if login_type=="login":
+                self.send_last_messages(client,username)
+
             return client, username
         
         except Exception as e:
@@ -154,7 +168,7 @@ class ServerChat():
 
                 self.clients[client] = username
 
-                self.broadcast(f'{username} has just entered the chat!'.encode('utf-8'), client, username)
+                self.broadcast(f'{username} has just entered the chat!'.encode('utf-8'), client, " SERVER_MESSAGE ")
 
                 threading.Thread(target=self.handle_client, args=(client,), daemon=True).start()
             except Exception as e:
