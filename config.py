@@ -13,5 +13,6 @@ DB_NAME = 'chat.db'
 
 # ---- Chat settings ----
 BUFFER_SIZE = 1024
-TIMEZONE = 'Asia/Jerusalem'
+TIMEZONE = "Asia/Jerusalem"
+TIME_FORMAT = "%d.%m.%Y %H:%M"
 BANS_FILE = 'bans.txt'

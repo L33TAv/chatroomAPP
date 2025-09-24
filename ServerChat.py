@@ -7,7 +7,7 @@ import getpass
 from datetime import datetime
 
 import database 
-from config import HOST,PORT,MAX_ATTEMPTS,CERT_FILE,KEY_FILE,BUFFER_SIZE,TIMEZONE,BANS_FILE
+from config import HOST,PORT,MAX_ATTEMPTS,CERT_FILE,KEY_FILE,BUFFER_SIZE,TIMEZONE,BANS_FILE, TIME_FORMAT
 
 logging.basicConfig(level=logging.INFO,format="%(asctime)s [%(levelname)s] %(message)s")
 
@@ -46,7 +46,8 @@ class ServerChat():
 
     def broadcast(self, message: bytes, sender=None, nickname="Unknown"):
         #sends to other users
-        timestamp = datetime.now(self.tz).strftime("%d.%m.%Y %H:%M")
+        print("sending -", nickname)
+        timestamp = datetime.now(self.tz).strftime(TIME_FORMAT)
         
         message = message.decode('utf-8')
         database.save_message(nickname, message) #loads texts only into database
@@ -70,10 +71,7 @@ class ServerChat():
             logging.info(f"{nickname} disconnected.")
 
     def is_message_ok(self,message: bytes): 
-        if message is not None:
-            return True
-        else:
-            return False
+        return bool(message)
 
     def handle_client(self, client):
         while True:

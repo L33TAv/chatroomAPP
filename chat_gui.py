@@ -3,7 +3,6 @@ from tkinter import Toplevel, Tk, Canvas, Entry, Text, Button, PhotoImage, END, 
 import client
 import queue
 
-
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\ליאב\Desktop\Root\software\chatroomAPP\GUI\assets\frame1")
 message_queue = queue.Queue()
@@ -19,7 +18,7 @@ def process_queue(text_area,chat_window,window):
             tag_name = "other_message"
             text_area.tag_configure(tag_name, foreground="black")
         text_area.config(state="normal")
-        text_area.insert(END, f"{msg}\n", "center")
+        text_area.insert(END, f"{msg}\n", ("center",tag_name))
         text_area.see(END)
         text_area.config(state="disabled")
     if client.stop_thread:

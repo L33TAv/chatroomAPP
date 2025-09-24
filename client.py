@@ -1,13 +1,21 @@
 import socket
 import threading 
 import ssl
-from config import CERT_FILE,HOST_NAME,PORT,HOST,BUFFER_SIZE
+from config import CERT_FILE,HOST_NAME,PORT,HOST,BUFFER_SIZE,TIMEZONE,TIME_FORMAT
 from tkinter import messagebox
 import chat_gui
+import pytz
+from datetime import datetime
+
 
 stop_thread = False
 authenticated = False
 client = None
+
+
+def get_current_time():
+    tz = pytz.timezone(TIMEZONE)
+    return  datetime.now(tz).strftime(TIME_FORMAT)
 
 def connect(login_type,username,password):
     try:
@@ -57,14 +65,11 @@ def close_chat():
 
     if client:
         try:
-            client.shutdown(socket.SHUT_RDWR)
             client.close()
         except:
             pass
         finally:
             client = None
-
-
 
 
 def auth(client,login_type,username, password):
@@ -94,7 +99,7 @@ def auth(client,login_type,username, password):
             return True
 
         elif response == 'REGISTERED':
-            messagebox.showwarning("Invalid Input",f"Welcome to the chat {username}!")
+            messagebox.showinfo("Invalid Input",f"Welcome to the chat {username}!")
             authenticated = True
             return True
 
@@ -119,13 +124,15 @@ def receive(client):
         try:
             message = client.recv(BUFFER_SIZE).decode('utf-8')
 
-            if not message: 
-                print("Connection has stopped.") 
-                stop_thread = True
-                break
+            if message and message.strip() and not stop_thread: 
+                chat_gui.message_queue.put((message,False))
 
             else:
-                chat_gui.message_queue.put((message,False))
+                if not stop_thread:
+                    print("Connection has stopped.") 
+                    stop_thread = True
+                break
+                
 
         except socket.timeout:
             continue 
@@ -137,21 +144,28 @@ def receive(client):
 
 
 def write(nickname, message):
-    global stop_thread,authenticated
+    global stop_thread,authenticated, client
     
     if stop_thread or not authenticated or client is None:
         return
+    
+    if not message.strip(): 
+            messagebox.showwarning("Invalid Input","You must write something in order to send.")
+            return
+
     try:
-        new_message = f"{nickname}: {message}"
-        client.send(f"{nickname}: {message}".encode('utf-8'))
-        chat_gui.message_queue.put((new_message, True))
+        full_msg  = f"{nickname}: {message}"
+        if client:
+            client.send(f"{full_msg}".encode('utf-8'))
+            timestamped_msg  = f"{get_current_time()} {full_msg}"
+            chat_gui.message_queue.put((timestamped_msg , True))
 
     except BrokenPipeError:
         messagebox.showerror("Server Error","the connection was already closed by the server.")
-        chat_gui.close_chat()
+        stop_thread = True
     except Exception as e:
         messagebox.showerror("Error",f"There was an error with sending the message, {e}")
-        chat_gui.close_chat()
+        stop_thread = True
 
         
         
