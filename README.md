@@ -9,8 +9,8 @@
 - SSL encrypted connections
 - Working Graphical Interface with login and chat page 
 
-[Login Page](README assets/LoginPage.PNG)
-[Chat Page](README assets/ChatPage.PNG)
+![Login Page](assets/LoginPage.PNG)
+![Chat Page](assets/ChatPage.PNG)
 
 ## Installation guide
 - **Clone the repository** - 
