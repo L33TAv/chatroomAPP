@@ -7,6 +7,10 @@
 - Multi-threading for handling multiple clients
 - SQLite database used for saving messages,users
 - SSL encrypted connections
+- Working Graphical Interface with login and chat page 
+
+[Login Page](README assets/LoginPage.PNG)
+[Chat Page](README assets/ChatPage.PNG)
 
 ## Installation guide
 - **Clone the repository** - 
