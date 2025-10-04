@@ -24,7 +24,7 @@ pip install -r requirements.txt
 ```
 - **Generate Certificate and Private Key**
 
-enter private password, and certificate information:
+enter private password, and certificate information - 
 ```
 password = b""  # --- enter your password here. ---
 
