@@ -1,9 +1,9 @@
 import socket
 import threading 
 import ssl
-from config import CERT_FILE,HOST_NAME,PORT,HOST,BUFFER_SIZE,TIMEZONE,TIME_FORMAT
+from config.config import CERT_FILE,HOST_NAME,PORT,HOST,BUFFER_SIZE,TIMEZONE,TIME_FORMAT
 from tkinter import messagebox
-import chat_gui
+import gui.chat_gui as chat_gui
 import pytz
 from datetime import datetime
 

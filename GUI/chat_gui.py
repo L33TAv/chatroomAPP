@@ -1,10 +1,10 @@
 from pathlib import Path
 from tkinter import Toplevel, Tk, Canvas, Entry, Text, Button, PhotoImage, END, CENTER, messagebox
-import client
+import client.client as client
 import queue
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\ליאב\Desktop\Root\software\chatroomAPP\GUI\assets\frame1")
+ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\ליאב\Desktop\Root\software\chatroomAPP\gui\assets\frame1")
 message_queue = queue.Queue()
 
 

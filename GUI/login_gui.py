@@ -3,10 +3,10 @@
 from pathlib import Path
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage,Label
 from tkinter import messagebox
-import chat_gui
+import gui.chat_gui as chat_gui
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\ליאב\Desktop\Root\software\chatroomAPP\GUI\assets\frame0")
+ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\ליאב\Desktop\Root\software\chatroomAPP\gui\assets\frame0")
 
 
 def only_alphabet(new_value):

@@ -6,8 +6,8 @@ import threading
 import getpass
 from datetime import datetime
 
-import database 
-from config import HOST,PORT,MAX_ATTEMPTS,CERT_FILE,KEY_FILE,BUFFER_SIZE,TIMEZONE,BANS_FILE, TIME_FORMAT, LAST_MESSAGES_SENT
+import database.database as database 
+from config.config import HOST,PORT,MAX_ATTEMPTS,CERT_FILE,KEY_FILE,BUFFER_SIZE,TIMEZONE,BANS_FILE, TIME_FORMAT, LAST_MESSAGES_SENT
 
 logging.basicConfig(level=logging.INFO,format="%(asctime)s [%(levelname)s] %(message)s")
 
