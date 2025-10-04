@@ -22,6 +22,10 @@
 cd chatroomAPP
 pip install -r requirements.txt
 ```
+- **Generate Certificate and Private Key**
+- enter private password.
+- enter certificate information.
+- run generate_cert.py
 
 ## Acknowledgements
  [Tkinter-Designer used with Figma](https://github.com/ParthJadhav/Tkinter-Designer)
