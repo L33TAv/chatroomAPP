@@ -15,5 +15,5 @@ DB_NAME = 'chat.db'
 BUFFER_SIZE = 1024
 TIMEZONE = "Asia/Jerusalem"
 TIME_FORMAT = "%d.%m.%Y %H:%M"
-BANS_FILE = 'bans.txt'
+BANS_FILE = 'database/bans.txt'
 LAST_MESSAGES_SENT = 10

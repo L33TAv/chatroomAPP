@@ -1,4 +1,4 @@
-from ServerChat import ServerChat
+from server.ServerChat import ServerChat
 import logging
 
 
