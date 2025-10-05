@@ -1,8 +1,8 @@
-# ChatRoomAPP
+# 💬 ChatRoomAPP 
 
  - **My goal**: making a secure mutli client server, built in python.
 
-## Main features
+## 💎 Main features
 - User authentication 
 - Multi-threading for handling multiple clients
 - SQLite database used for saving messages,users
@@ -13,7 +13,7 @@
 ![Login Page](assets/LoginPage.PNG)
 ![Chat Page](assets/ChatPage.PNG)
 
-## Installation guide
+## 📦 Installation guide
 - **Clone the repository** - 
 ```
  git clone https://github.com/L33TAv/chatroomAPP.git
@@ -40,5 +40,5 @@ run generate_cert.py
 
 run server.py to host the server, login_gui.py to start connection as a client.
 
-## Acknowledgements
+## 👀 Acknowledgements
  [Tkinter-Designer used with Figma](https://github.com/ParthJadhav/Tkinter-Designer)
