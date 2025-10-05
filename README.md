@@ -1,6 +1,6 @@
 # 💬 ChatRoomAPP 
 
- - **My goal**: making a secure mutli client server, built in python.
+ - **My goal**: making a secure multi client server, built in python.
 
 ## 💎 Main features
 - User authentication 
