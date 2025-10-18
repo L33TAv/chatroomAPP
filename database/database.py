@@ -5,8 +5,9 @@ import pytz
 from datetime import datetime
 from config.config import DB_NAME
 
-def create_messages_table():
-    conn = sqlite3.connect(DB_NAME) 
+def create_messages_table(db_file=DB_NAME):
+    conn = sqlite3.connect(db_file) 
+    
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS messages(
@@ -19,8 +20,8 @@ def create_messages_table():
     conn.commit()
     conn.close()
 
-def create_users_table():
-    conn = sqlite3.connect(DB_NAME)
+def create_users_table(db_file=DB_NAME):
+    conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -32,8 +33,8 @@ def create_users_table():
     conn.commit()
     conn.close()
 
-def register_user(username, password):
-    conn = sqlite3.connect(DB_NAME)
+def register_user(username, password, db_file=DB_NAME):
+    conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
 
     password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
@@ -47,17 +48,17 @@ def register_user(username, password):
     finally:
         conn.close()
 
-def check_user(username):
+def check_user(username,db_file=DB_NAME):
     """Checks if the users exists, it will return True."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
     cursor.execute("SELECT EXISTS(SELECT 1 FROM users WHERE username=?)", (username,))
     exists = cursor.fetchone()[0]
     conn.close()
     return bool(exists)
 
-def authenticate_user(username, password):
-    conn = sqlite3.connect(DB_NAME)
+def authenticate_user(username, password,db_file=DB_NAME):
+    conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
     cursor.execute("SELECT password_hash FROM users WHERE username = ?", (username,))
     row = cursor.fetchone()
@@ -72,10 +73,10 @@ def authenticate_user(username, password):
     else:
         return False
     
-def save_message(sender,content):
+def save_message(sender,content,db_file=DB_NAME):
     israel_tz = pytz.timezone("Asia/Jerusalem")
     timestamp = datetime.now(israel_tz).strftime("%d.%m.%Y %H:%M")
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO messages (sender,content, timeStamp)
@@ -84,8 +85,8 @@ def save_message(sender,content):
     conn.commit()
     conn.close()
 
-def get_last_messages(limit=15):
-    conn = sqlite3.connect(DB_NAME)
+def get_last_messages(limit=15,db_file=DB_NAME):
+    conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
     cursor.execute('''
         SELECT sender,content,timeStamp
